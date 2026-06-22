@@ -71,7 +71,11 @@ export interface PredictionMetric {
 
 // ─── Job Queue ────────────────────────────────────────────────────────────────
 
-export type JobName = "scrape-prediction" | "analyze-prediction" | "resolve-prediction";
+export type JobName =
+  | "scrape-prediction"
+  | "analyze-prediction"
+  | "resolve-prediction"
+  | "odds-ingestion";
 
 export interface ScrapeJobData {
   url: string;
@@ -88,4 +92,19 @@ export interface ResolveJobData {
   resolvedAt: Date;
 }
 
-export type JobData = ScrapeJobData | AnalyzeJobData | ResolveJobData;
+export interface FetchOddsApiJobData {
+  sport: string;
+  regions?: string;
+  markets?: string;
+}
+
+export interface ScrapeBookJobData {
+  bookSlug: string;
+  sport: string;
+  url: string;
+}
+
+export type OddsIngestionJobName = "fetchOddsApi" | "scrapeBook";
+export type OddsIngestionJobData = FetchOddsApiJobData | ScrapeBookJobData;
+
+export type JobData = ScrapeJobData | AnalyzeJobData | ResolveJobData | OddsIngestionJobData;
