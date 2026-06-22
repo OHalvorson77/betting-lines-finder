@@ -15,11 +15,17 @@
     "./client": {
       "import": "./dist/client.js",
       "types": "./dist/client.d.ts"
+    },
+    "./redis": {
+      "import": "./dist/redis.js",
+      "types": "./dist/redis.d.ts"
     }
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "tsc -p tsconfig.json --watch",
@@ -34,6 +40,7 @@
   },
   "dependencies": {
     "drizzle-orm": "^0.33.0",
+    "ioredis": "^5.11.1",
     "postgres": "^3.4.4"
   },
   "devDependencies": {

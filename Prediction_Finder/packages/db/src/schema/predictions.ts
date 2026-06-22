@@ -41,12 +41,12 @@ export const predictions = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [
-    index("predictions_status_idx").on(t.status),
-    index("predictions_source_idx").on(t.source),
-    index("predictions_predicted_at_idx").on(t.predictedAt),
-    index("predictions_tags_idx").using("gin", t.tags),
-  ],
+  (t) => ({
+    statusIdx: index("predictions_status_idx").on(t.status),
+    sourceIdx: index("predictions_source_idx").on(t.source),
+    predictedAtIdx: index("predictions_predicted_at_idx").on(t.predictedAt),
+    tagsIdx: index("predictions_tags_idx").using("gin", t.tags),
+  }),
 );
 
 // ─── Prediction Metrics (TimescaleDB hypertable) ──────────────────────────────
@@ -69,11 +69,11 @@ export const predictionMetrics = pgTable(
     value: doublePrecision("value").notNull(),
     metadata: jsonb("metadata"),
   },
-  (t) => [
-    index("prediction_metrics_prediction_id_idx").on(t.predictionId),
-    index("prediction_metrics_metric_name_idx").on(t.metricName),
+  (t) => ({
+    predictionIdIdx: index("prediction_metrics_prediction_id_idx").on(t.predictionId),
+    metricNameIdx: index("prediction_metrics_metric_name_idx").on(t.metricName),
     // TimescaleDB will create its own time index on the hypertable
-  ],
+  }),
 );
 
 // ─── Sources ──────────────────────────────────────────────────────────────────
@@ -91,7 +91,9 @@ export const sources = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [index("sources_is_active_idx").on(t.isActive)],
+  (t) => ({
+    isActiveIdx: index("sources_is_active_idx").on(t.isActive),
+  }),
 );
 
 export type Prediction = typeof predictions.$inferSelect;
