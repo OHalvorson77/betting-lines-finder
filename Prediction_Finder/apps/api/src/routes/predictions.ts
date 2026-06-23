@@ -1,6 +1,5 @@
 import { getDb, predictions } from "@prediction-finder/db";
-import { type CreatePredictionInput } from "@prediction-finder/shared";
-import { eq } from "drizzle-orm";
+import { count, eq } from "drizzle-orm";
 import { type FastifyPluginAsync } from "fastify";
 import { z } from "zod";
 
@@ -45,15 +44,16 @@ export const predictionRoutes: FastifyPluginAsync = async (app) => {
 
       const [rows, countResult] = await Promise.all([
         db.select().from(predictions).limit(query.limit).offset(offset),
-        db.$count(predictions),
+        db.select({ value: count() }).from(predictions),
       ]);
 
+      const total = Number(countResult[0]?.value ?? 0);
       return reply.send({
         data: rows,
-        total: Number(countResult),
+        total,
         page: query.page,
         limit: query.limit,
-        totalPages: Math.ceil(Number(countResult) / query.limit),
+        totalPages: Math.ceil(total / query.limit),
       });
     },
   );
@@ -107,7 +107,7 @@ export const predictionRoutes: FastifyPluginAsync = async (app) => {
       },
     },
     async (req, reply) => {
-      const input = createPredictionSchema.parse(req.body) satisfies CreatePredictionInput;
+      const input = createPredictionSchema.parse(req.body);
 
       const [created] = await db
         .insert(predictions)
@@ -115,10 +115,10 @@ export const predictionRoutes: FastifyPluginAsync = async (app) => {
           subject: input.subject,
           content: input.content,
           source: input.source,
-          sourceUrl: input.sourceUrl,
+          sourceUrl: input.sourceUrl ?? null,
           predictedAt: input.predictedAt,
-          resolveAt: input.resolveAt,
-          confidence: input.confidence,
+          resolveAt: input.resolveAt ?? null,
+          confidence: input.confidence ?? null,
           tags: input.tags ?? [],
         })
         .returning();
